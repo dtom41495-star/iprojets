@@ -268,7 +268,15 @@ function colorFor(id){var idx=0;for(var i=0;i<(id||'').length;i++)idx+=id.charCo
 function notif(m,t){var el=e('toast');el.textContent=m;el.style.background=t==='s'?'#059669':t==='e'?'#A32D2D':'#1A1A2E';el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),2800);}
 function ld(){return '<div class="ld"><span></span><span></span><span></span></div>';}
 function ah(){return {apikey:AK,'Content-Type':'application/json','Authorization':'Bearer '+_s.access_token};}
-function dbg(p){return fetch(SB+p,{headers:ah()}).then(r=>r.json());}
+function dbg(p){
+  return fetch(SB+p,{headers:ah()}).then(r=>r.json().then(d=>{
+    if(!r.ok||(d&&d.code)){
+      if(r.status===401){notif('Session expirée, reconnecte-toi','e');logout();}
+      else notif('Erreur de chargement des données','e');
+    }
+    return d;
+  })).catch(()=>{notif('Erreur réseau','e');return {code:'network_error'};});
+}
 function progPct(taches){if(!taches||!taches.length)return 0;var f=taches.filter(t=>t.statut==='fait').length;return Math.round(f/taches.length*100);}
 
 // ── AUTH ──
@@ -492,11 +500,11 @@ function dragEnd(el){
 }
 
 async function dropOnCol(colId){
-  if(!_drag||!colId) return;
+  if(!_drag) return;
   const t=_drag.tache, p=_drag.projet;
   const el=_drag.sourceEl;
   dragEnd(el);
-  if(t.statut===colId) return;
+  if(!colId||t.statut===colId) return;
   await fetch(SB+'/rest/v1/projets_taches?id=eq.'+t.id,{
     method:'PATCH',
     headers:Object.assign({'Prefer':'return=minimal'},ah()),
@@ -571,25 +579,24 @@ function mkCard(t,p,pg,uid){
 
   // Drag uniquement via mousedown/touchstart custom — pas de draggable=true natif
   let dragTimer=null;
+  let mouseDown=false;
   let startX=0, startY=0;
 
   c.onmousedown = ev=>{
     if(ev.button!==0) return;
     startX=ev.clientX; startY=ev.clientY;
-    dragTimer=setTimeout(()=>{
-      dragStart(t,p,c,ev);
-    },120); // petit délai pour distinguer clic et drag
+    mouseDown=true;
   };
   c.onmouseup = ev=>{
-    if(dragTimer){clearTimeout(dragTimer);dragTimer=null;}
+    mouseDown=false;
     // Si pas en drag → c'est un clic
     if(!_drag) taskDetail(t,p,pg,uid);
   };
   c.onmousemove = ev=>{
-    if(dragTimer){
+    if(mouseDown && !_drag){
       const dx=Math.abs(ev.clientX-startX), dy=Math.abs(ev.clientY-startY);
       if(dx>5||dy>5){
-        clearTimeout(dragTimer);dragTimer=null;
+        mouseDown=false;
         dragStart(t,p,c,ev);
       }
     }
@@ -675,7 +682,7 @@ function buildStatutButtons(current){
   var h='<div><div style="font-size:.62rem;text-transform:uppercase;color:var(--g);letter-spacing:.07em;margin-bottom:7px;font-weight:600;">Statut</div><div class="sop">';
   COLS.forEach(function(c){
     var on=current===c.id;
-    h+='<button class="so'+(on?' on':'')+'" data-s="'+c.id+'" style="'+(on?'background:'+c.c+';border-color:'+c.c+';color:white;':'color:'+c.c+';"')+'>'+c.l+'</button>';
+    h+='<button class="so'+(on?' on':'')+'" data-s="'+c.id+'" style="'+(on?'background:'+c.c+';border-color:'+c.c+';color:white;':'color:'+c.c+';')+'">'+c.l+'</button>';
   });
   h+='</div><button id="sv-btn" class="btn-submit" style="margin-top:.6rem;">Enregistrer</button></div>';
   return h;
