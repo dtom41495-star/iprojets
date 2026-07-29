@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ipsum Projets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -12,20 +14,33 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--gc);color:var(--e);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:14px;}
 
-/* ── AUTH ── */
-#auth{flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1A1A2E 0%,#16213E 60%,#0F3460 100%);}
-.auth-card{background:white;border-radius:20px;padding:2.5rem;width:min(400px,90vw);box-shadow:0 24px 64px rgba(0,0,0,.35);}
-.auth-logo{display:flex;align-items:center;gap:.9rem;margin-bottom:2rem;}
-.auth-icon{width:52px;height:52px;background:var(--r);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
-.auth-title{font-weight:800;font-size:1.2rem;color:var(--e);}
-.auth-sub{font-size:.7rem;color:var(--g);margin-top:1px;}
-.fld{margin-bottom:.9rem;}
-.fld label{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--g);display:block;margin-bottom:5px;font-weight:600;}
-.fld input{width:100%;padding:.6rem .8rem;border:1.5px solid var(--gb);border-radius:10px;font-size:.9rem;outline:none;transition:border-color .15s;}
-.fld input:focus{border-color:var(--r);}
-.btn-login{width:100%;padding:.7rem;background:var(--r);color:white;border:none;border-radius:10px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:.3rem;transition:background .15s;}
-.btn-login:hover{background:#c93d18;}
-.err{background:#FEE2E2;color:#991B1B;padding:.5rem .8rem;border-radius:8px;font-size:.75rem;margin-bottom:.8rem;display:none;}
+/* ── AUTH (écran de connexion Compo) ── */
+#auth{
+  position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  background:#1A1A2E;overflow-y:auto;overflow-x:hidden;padding:24px;box-sizing:border-box;
+}
+#auth::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 60%, rgba(234,91,28,0.20) 0%, transparent 65%),
+             radial-gradient(ellipse at 80% 15%, rgba(234,91,28,0.10) 0%, transparent 55%);
+  pointer-events:none;
+}
+.os-login-center{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:1.1rem;width:100%;max-width:400px;margin:auto 0;}
+.os-login-brand{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.os-login-time{font-family:Arial,sans-serif;font-size:.7rem;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.15em;text-transform:uppercase;}
+.os-login-date{display:none;}
+.os-login-card{background:#FDFAF9;border:none;border-radius:20px;padding:1.8rem 2.4rem;display:flex;flex-direction:column;align-items:stretch;gap:0;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.35);box-sizing:border-box;}
+.os-login-contact{font-family:'DM Sans',sans-serif;font-size:.68rem;color:#9CA3AF;text-align:center;margin-top:.9rem;}
+.os-login-contact a{color:#EA5B1C;font-weight:600;text-decoration:none;}
+.os-login-contact a:hover{text-decoration:underline;}
+.os-login-input{width:100%;background:white !important;-webkit-appearance:none;border:1.5px solid #E5E0DC !important;border-radius:10px;padding:.7rem 1rem;color:#1A1A2E !important;font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;text-align:left;transition:border-color .15s,box-shadow .15s;caret-color:#EA5B1C;margin-bottom:0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.os-login-input:focus{border-color:#EA5B1C !important;box-shadow:0 0 0 3px rgba(234,91,28,.12) !important;}
+.os-login-input::placeholder{color:#C4BBBB;}
+.os-login-btn{width:100%;background:linear-gradient(135deg,#E8461E,#C73A18);color:white;border:none;border-radius:10px;padding:.85rem;font-family:'Poppins',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;letter-spacing:.02em;box-shadow:0 4px 14px rgba(232,70,30,.35);}
+.os-login-btn:hover{background:linear-gradient(135deg,#D93D18,#B83210);box-shadow:0 6px 20px rgba(232,70,30,.45);transform:translateY(-1px);}
+.os-login-btn:active{transform:scale(.98);box-shadow:none;}
+.err{font-size:.75rem;color:#d44f17;text-align:center;display:none;margin-top:10px;background:rgba(232,70,30,.06);border:1px solid rgba(232,70,30,.2);border-radius:8px;padding:8px 12px;}
+@media(max-width:700px){ #auth{padding:16px;} .os-login-card{padding:1.5rem 1.3rem;} }
 
 /* ── APP ── */
 #app{flex:1;display:none;flex-direction:column;overflow:hidden;}
@@ -199,15 +214,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 
 <!-- AUTH -->
 <div id="auth">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-icon">📋</div>
-      <div><div class="auth-title">Ipsum Projets</div><div class="auth-sub">Ipsum Média · Espace collaboratif</div></div>
+  <canvas id="os-login-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+  <div class="os-login-center">
+    <div class="os-login-brand">
+      <div style="font-family:Arial,sans-serif;font-size:.66rem;font-weight:600;color:#EA5B1C;text-transform:uppercase;letter-spacing:.14em;">Bienvenue chez Ipsum Média</div>
+      <div class="os-login-time" id="os-login-clock">00:00</div>
+      <div class="os-login-date" id="os-login-date"></div>
     </div>
-    <div class="err" id="err"></div>
-    <div class="fld"><label>Adresse e-mail</label><input type="email" id="em" placeholder="prenom@ipsummedia.fr" autocomplete="email"></div>
-    <div class="fld"><label>Mot de passe</label><input type="password" id="pw" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-login" id="bl">Se connecter</button>
+    <div class="os-login-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;">
+        <div style="width:38px;height:38px;background:linear-gradient(135deg,#E8461E,#C73A18);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(232,70,30,.3);">
+          <span style="font-size:1.1rem;">📋</span>
+        </div>
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;color:#1A1A2E;line-height:1.1;">Ipsum Projets</div>
+          <div style="font-size:.6rem;color:#9CA3AF;font-family:'DM Sans',sans-serif;">Ipsum Média</div>
+        </div>
+      </div>
+      <div style="margin-bottom:1.1rem;">
+        <div style="font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:800;color:#1A1A2E;margin-bottom:4px;line-height:1.2;">Connexion</div>
+        <div style="font-size:.82rem;color:#9CA3AF;font-family:'DM Sans',sans-serif;">Accède à ton espace projets</div>
+      </div>
+      <div style="width:100%;margin-bottom:.6rem;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Email</div>
+        <input class="os-login-input" type="email" id="em" placeholder="prenom@ipsummedia.fr" autocomplete="email">
+      </div>
+      <div style="width:100%;margin-bottom:.9rem;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Mot de passe</div>
+        <input class="os-login-input" type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="os-login-btn" id="bl">Se connecter</button>
+      <div class="err" id="err"></div>
+      <div class="os-login-contact">Un problème de connexion ? Contacte <a href="mailto:contact@ipsummedia.fr">contact@ipsummedia.fr</a></div>
+    </div>
   </div>
 </div>
 
@@ -309,9 +348,26 @@ function logout(){
   e('auth').style.display='flex';e('app').style.display='none';
   e('bl').textContent='Se connecter';
 }
-(function(){
-  try{const sv=localStorage.getItem('ip_sess');if(sv){const s=JSON.parse(sv);if((s.expires_at||0)>Math.floor(Date.now()/1000)){_s=s;_u=s.user;loadProfile().then(showApp);return;}}}catch(x){}
-})();
+// ── SSO depuis Compo : si ouvert dans l'iframe "Projets" de Compo OS,
+// on saute l'écran de connexion et on récupère la session déjà active là-bas.
+const COMPO_ORIGIN='https://compo.ipsummedia.fr';
+if(window.parent!==window){
+  window.addEventListener('message', ev=>{
+    if(ev.origin!==COMPO_ORIGIN)return;
+    if(ev.data&&ev.data.type==='compo-session'&&ev.data.session&&ev.data.session.access_token){
+      const sess=ev.data.session;
+      _s=Object.assign({},sess,{expires_at:Math.floor((sess.expires_at||(Date.now()+3600000))/1000)});
+      _u=sess.user;
+      try{localStorage.setItem('ip_sess',JSON.stringify(_s));}catch(x){}
+      loadProfile().then(showApp);
+    }
+  });
+  window.parent.postMessage({type:'ipsum-projets-ready'}, COMPO_ORIGIN);
+}else{
+  (function(){
+    try{const sv=localStorage.getItem('ip_sess');if(sv){const s=JSON.parse(sv);if((s.expires_at||0)>Math.floor(Date.now()/1000)){_s=s;_u=s.user;loadProfile().then(showApp);return;}}}catch(x){}
+  })();
+}
 
 // ── LOAD ──
 async function load(){
@@ -801,6 +857,48 @@ function formTask(t,p){
 // ── EVENTS ──
 e('bl').onclick=login;e('pw').onkeydown=ev=>{if(ev.key==='Enter')login();};
 e('lg').onclick=logout;e('np-btn').onclick=()=>formProj(null);
+
+// ── ÉCRAN DE CONNEXION : horloge + animation de fond ──
+function osLoginClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0'),m=String(now.getMinutes()).padStart(2,'0');
+  const jours=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const el=e('os-login-clock'),del=e('os-login-date');
+  if(el)el.textContent=h+':'+m;
+  if(del)del.textContent=jours[now.getDay()]+' '+now.getDate()+' '+mois[now.getMonth()]+' '+now.getFullYear();
+  setTimeout(osLoginClock,10000);
+}
+osLoginClock();
+
+function osLoginAnimationStart(){
+  const c=e('os-login-canvas');if(!c)return;
+  const panel=c.parentElement,ctx=c.getContext('2d');
+  let t=0,raf;
+  function resize(){c.width=panel.offsetWidth;c.height=panel.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);t+=0.016;
+    const cols=Math.floor(c.width/26),rows=Math.floor(c.height/26);
+    for(let i=0;i<=cols;i++)for(let j=0;j<=rows;j++){
+      const x=i*26+13,y=j*26+13;
+      const wave=Math.sin(t*0.9+i*0.42+j*0.28)*0.5+0.5;
+      const wave2=Math.sin(t*0.55+i*0.18-j*0.45)*0.5+0.5;
+      const combined=wave*wave2,alpha=combined*0.28+0.03,r=combined*1.4+0.5;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=combined>0.70?'rgba(234,91,28,'+(alpha*2.2)+')':'rgba(255,255,255,'+alpha+')';
+      ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  draw();
+  const obs=new MutationObserver(()=>{
+    const a=e('auth');
+    if(a&&a.style.display==='none'){cancelAnimationFrame(raf);obs.disconnect();}
+  });
+  obs.observe(document.body,{attributes:true,subtree:true,attributeFilter:['style']});
+}
+setTimeout(osLoginAnimationStart,200);
 </script>
 </body>
 </html>
