@@ -231,19 +231,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
           <div style="font-size:.6rem;color:#9CA3AF;font-family:'DM Sans',sans-serif;">Ipsum Média</div>
         </div>
       </div>
-      <div style="margin-bottom:1.1rem;">
+      <div style="margin-bottom:1.4rem;">
         <div style="font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:800;color:#1A1A2E;margin-bottom:4px;line-height:1.2;">Connexion</div>
-        <div style="font-size:.82rem;color:#9CA3AF;font-family:'DM Sans',sans-serif;">Accède à ton espace projets</div>
+        <div style="font-size:.82rem;color:#9CA3AF;font-family:'DM Sans',sans-serif;">Accède à ton espace projets avec ton compte Google Ipsum Média</div>
       </div>
-      <div style="width:100%;margin-bottom:.6rem;">
-        <div style="font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Email</div>
-        <input class="os-login-input" type="email" id="em" placeholder="prenom@ipsummedia.fr" autocomplete="email">
-      </div>
-      <div style="width:100%;margin-bottom:.9rem;">
-        <div style="font-family:'DM Sans',sans-serif;font-size:.62rem;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Mot de passe</div>
-        <input class="os-login-input" type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button class="os-login-btn" id="bl">Se connecter</button>
+      <button class="os-login-btn" id="bl" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.5 29.6 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.1-5.6l-6.5-5.5C29.6 34.9 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.1 5.7l6.5 5.5C39.9 37.5 44 31.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        <span>Continuer avec Google</span>
+      </button>
       <div class="err" id="err"></div>
       <div class="os-login-contact">Un problème de connexion ? Contacte <a href="mailto:contact@ipsummedia.fr">contact@ipsummedia.fr</a></div>
     </div>
@@ -318,20 +313,32 @@ function dbg(p){
 }
 function progPct(taches){if(!taches||!taches.length)return 0;var f=taches.filter(t=>t.statut==='fait').length;return Math.round(f/taches.length*100);}
 
-// ── AUTH ──
-async function login(){
-  const em=(e('em').value||'').trim(),pw=e('pw').value||'';
-  const er=e('err');er.style.display='none';
-  if(!em||!pw){er.textContent='Remplis les deux champs';er.style.display='block';return;}
-  e('bl').textContent='Connexion...';
+// ── AUTH (Google uniquement — via Supabase Auth, même projet que Compo) ──
+function loginGoogle(){
+  const retour = location.origin + location.pathname;
+  location.href = SB+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent(retour)+'&hd=ipsummedia.fr';
+}
+// Retour de redirection Google : le jeton arrive dans le fragment d'URL
+// (#access_token=...), sans l'objet user — on le récupère séparément.
+async function checkRetourGoogle(){
+  if(location.hash.indexOf('access_token=')===-1) return false;
+  const params=new URLSearchParams(location.hash.slice(1));
+  const accessToken=params.get('access_token');
+  const refreshToken=params.get('refresh_token');
+  const expiresIn=parseInt(params.get('expires_in')||'3600',10);
+  history.replaceState(null,'',location.pathname+location.search);
+  const er=e('err');
+  if(!accessToken) return true;
   try{
-    const r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:AK,'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})});
-    const d=await r.json();
-    if(!d.access_token){er.textContent=d.error_description||'Identifiants invalides';er.style.display='block';e('bl').textContent='Se connecter';return;}
-    _s=d;_u=d.user;
-    try{localStorage.setItem('ip_sess',JSON.stringify(d));}catch(x){}
+    const r=await fetch(SB+'/auth/v1/user',{headers:{apikey:AK,Authorization:'Bearer '+accessToken}});
+    const user=await r.json();
+    if(!user||!user.id){er.textContent='Connexion Google échouée';er.style.display='block';return true;}
+    _s={access_token:accessToken,refresh_token:refreshToken,user:user,expires_at:Math.floor(Date.now()/1000)+expiresIn};
+    _u=user;
+    try{localStorage.setItem('ip_sess',JSON.stringify(_s));}catch(x){}
     await loadProfile();showApp();
-  }catch(ex){er.textContent='Erreur réseau';er.style.display='block';e('bl').textContent='Se connecter';}
+  }catch(ex){er.textContent='Erreur réseau';er.style.display='block';}
+  return true;
 }
 async function loadProfile(){
   const d=await dbg('/rest/v1/membres?id=eq.'+_u.id+'&select=prenom,nom,role&limit=1');
@@ -346,10 +353,10 @@ function logout(){
   try{localStorage.removeItem('ip_sess');}catch(x){}
   _s=_u=_r=null;_projets=[];_pa=null;
   e('auth').style.display='flex';e('app').style.display='none';
-  e('bl').textContent='Se connecter';
 }
 // ── SSO depuis Compo : si ouvert dans l'iframe "Projets" de Compo OS,
-// on saute l'écran de connexion et on récupère la session déjà active là-bas.
+// on saute l'écran de connexion et on récupère la session déjà active là-bas
+// (quelle que soit la méthode utilisée pour se connecter à Compo — Google ou mot de passe).
 const COMPO_ORIGIN='https://compo.ipsummedia.fr';
 if(window.parent!==window){
   window.addEventListener('message', ev=>{
@@ -364,9 +371,10 @@ if(window.parent!==window){
   });
   window.parent.postMessage({type:'ipsum-projets-ready'}, COMPO_ORIGIN);
 }else{
-  (function(){
+  checkRetourGoogle().then(handled=>{
+    if(handled) return;
     try{const sv=localStorage.getItem('ip_sess');if(sv){const s=JSON.parse(sv);if((s.expires_at||0)>Math.floor(Date.now()/1000)){_s=s;_u=s.user;loadProfile().then(showApp);return;}}}catch(x){}
-  })();
+  });
 }
 
 // ── LOAD ──
@@ -855,7 +863,7 @@ function formTask(t,p){
 }
 
 // ── EVENTS ──
-e('bl').onclick=login;e('pw').onkeydown=ev=>{if(ev.key==='Enter')login();};
+e('bl').onclick=loginGoogle;
 e('lg').onclick=logout;e('np-btn').onclick=()=>formProj(null);
 
 // ── ÉCRAN DE CONNEXION : horloge + animation de fond ──
